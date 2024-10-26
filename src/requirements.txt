@@ -4,3 +4,5 @@ scikit-learn==1.5.2
 zelos-demeter==0.7.4
 langgraph==0.2.39
 langchain-openai
+langserve
+fastapi

@@ -3,11 +3,91 @@ from langchain_openai import ChatOpenAI
 from datetime import date, datetime
 from typing import Union
 from demeter import TokenInfo, Actuator, Strategy, RowData, MarketInfo, MarketTypeEnum, ChainType, AtTimeTrigger
-from demeter.aave import AaveBalance, AaveV3Market, AaveTokenStatus
+from demeter.aave import AaveBalance, AaveV3Market, AaveTokenStatus, SupplyKey, BorrowKey
 import pandas as pd
-global market
-from simple_agent import LendingAgent
 from langchain_core.messages import SystemMessage
+from simple_agent import LendingAgent
+from pydantic import BaseModel, Field
+from langchain_core.tools import tool
+from typing import Optional
+
+global market
+
+class Operation(BaseModel):
+    token: TokenInfo = Field(description="Token to operate on")
+    amount: float = Field(description="Amount to operate on. It is 0 for withdraw and repay")
+
+@tool(args_schema = Operation)
+def supply(token: TokenInfo, amount: float) -> Optional[SupplyKey]:
+    """Supplies a specified amount of a given token to the Aave market2.
+
+    Args:
+        token: The token to supply.
+        amount: The amount of the token to supply.
+
+    Returns:
+        The SupplyKey for the supply operation if successful, otherwise None.
+    """
+    try:
+        supply_key = market.supply(token, amount)
+        return supply_key
+    except Exception as e:
+        print(e)
+    return None
+
+@tool(args_schema = Operation)
+def borrow(token: TokenInfo, amount: float) -> Optional[BorrowKey]:
+    """Borrows a specified amount of a given token from the Aave market2.
+
+    Args:
+        token: The token to borrow.
+        amount: The amount of the token to borrow.
+
+    Returns:
+        The BorrowKey for the borrow operation if successful, otherwise None.
+    """
+    try:
+        borrow_key = market.borrow(token, amount)
+        return borrow_key
+    except Exception as e:
+        print(e)
+    return None
+
+@tool(args_schema = Operation)
+def withdraw(token: TokenInfo, amount: float) -> bool:
+    """Withdraws previously supplied tokens. 
+    
+    Args:
+        token: The token is a SupplyKey (TokenInfo) obtained during the supply operation.
+        amount: must be 0
+        
+    Returns:
+        True if the withdrawal is successful, otherwise False.
+    """
+    try:
+        market.withdraw(token)  # Use the supply_key here
+        return True
+    except Exception as e:
+        print(e)
+        return False
+
+@tool(args_schema = Operation)
+def repay(token: TokenInfo, amount: float) -> bool:
+    """Repays a previous borrow operation.
+    
+    Args:
+        token: The token is BorrowKey (TokenInfo) obtained during the borrow operation.
+        amount: must be 0
+        
+    Returns:
+        True if the repayment is successful, otherwise False.
+    """
+    try:
+        market.repay(token)  # Use the borrow_key here
+        return True
+    except Exception as e:
+        print(e)
+    return False   
 
 # setting up credentioals
 os.environ["OPENAI_MODEL_NAME"]='gpt-4o-mini'  
@@ -53,7 +133,7 @@ class MySimpleStrategy(Strategy):
         '''
         #init the agent
         self.model = ChatOpenAI(model="gpt-4o-mini")
-        self.agent = LendingAgent(self.model, prompt, market)
+        self.agent = LendingAgent(self.model, [supply, borrow, withdraw, repay], prompt)
         self.counter = 0
         pass
 
