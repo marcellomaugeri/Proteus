@@ -38,3 +38,5 @@ build
 .env
 data-analysis/bigquerykey.json
 src/venv/
+.vscode
+hypersync
