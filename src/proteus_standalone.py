@@ -79,5 +79,3 @@ class LendingAgent:
     def exists_function_calling(self, state: AgentState):
         result = state['messages'][-1]
         return len(result.tool_calls) > 0
-    
-    

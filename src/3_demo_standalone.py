@@ -6,7 +6,7 @@ from demeter import TokenInfo, Actuator, Strategy, RowData, MarketInfo, MarketTy
 from demeter.aave import AaveBalance, AaveV3Market, AaveTokenStatus, SupplyKey, BorrowKey
 import pandas as pd
 from langchain_core.messages import SystemMessage
-from simple_agent import LendingAgent
+from proteus_standalone import LendingAgent
 from pydantic import BaseModel, Field
 from langchain_core.tools import tool
 from typing import Optional
@@ -92,35 +92,6 @@ def repay(token: TokenInfo, amount: float) -> bool:
 # setting up credentioals
 os.environ["OPENAI_MODEL_NAME"]='gpt-4o-mini'  
 os.environ["OPENAI_API_KEY"] = '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'
-
-class MyFirstStrategy(Strategy):
-    def initialize(self):
-        supply_trigger = AtTimeTrigger(time=datetime(2024, 6, 10, 0, 1, 0), do=self.supply)
-        withdraw_trigger = AtTimeTrigger(time=datetime(2024, 6, 14, 23, 58, 0), do=self.withdraw)
-        #borrow_trigger = AtTimeTrigger(time=datetime(2024, 6, 20, 0, 2, 0), do=self.borrow)
-        repay_trigger = AtTimeTrigger(time=datetime(2024, 6, 30, 23, 57, 0), do=self.repay)
-        self.triggers.extend([supply_trigger, withdraw_trigger, repay_trigger])
-
-    def supply(self, row_data: RowData):
-        print(self.markets)
-        supply_key = market.supply(weth, 10, True)
-
-    def borrow(self, row_data: RowData):
-        borrow_key = market.borrow(weth, 3)
-
-    def repay(self, row_data: RowData):
-        for key in market.borrow_keys:
-            market.repay(key)
-
-    def withdraw(self, row_data: RowData):
-        for key in market.supply_keys:
-            market.withdraw(key)
-
-    def on_bar(self, row_data: RowData):
-        balance: AaveBalance = market.get_market_balance()
-        market_status: Union[pd.Series, AaveTokenStatus] = row_data.market_status[market_key]
-        print(market_status)
-        pass
     
 class MySimpleStrategy(Strategy):
     def initialize(self):
@@ -172,6 +143,17 @@ class MySimpleStrategy(Strategy):
     
     
 if __name__ == "__main__":
+    print("""BLUE = '\033[34m'
+          
+ ,---.  ,---.    .---.  _______ ,---.  .-. .-.   .---. 
+ | .-.\ | .-.\  / .-. )|__   __|| .-'  | | | |  ( .-._)
+ | |-' )| `-'/  | | |(_) )| |   | `-.  | | | | (_) \   
+ | |--' |   (   | | | | (_) |   | .-'  | | | | _  \ \  
+ | |    | |\ \  \ `-' /   | |   |  `--.| `-')|( `-'  ) 
+ /(     |_| \)\  )---'    `-'   /( __.'`---(_) `----'  
+(__)        (__)(_)            (__)                    
+
+""")
     usdc = TokenInfo(name="usdc", decimal=18, address="0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174")
     weth = TokenInfo(name="weth", decimal=18, address="0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619")
     token_list = [ usdc, weth ]
@@ -179,8 +161,8 @@ if __name__ == "__main__":
     #TokenInfo(name="usdt", decimal=18, address="0xc2132D05D31c914a87C6611C10748AEb04B58e8F"),
     #TokenInfo(name="sushi", decimal=18, address="0x0b3F868E0BE5597D5DB7fEB59E1CADBb0fdDa50a"),
     market_key = MarketInfo("aave", MarketTypeEnum.aave_v3)
-    market = AaveV3Market(market_key, "riskparameters.csv", token_list)
-    market.data_path = "./sample"
+    market = AaveV3Market(market_key, "../data/riskparameters.csv", token_list)
+    market.data_path = "../data/sample"
 
     market.load_data(
         chain=ChainType.polygon,
