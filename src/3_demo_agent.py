@@ -6,7 +6,7 @@ from demeter import TokenInfo, Actuator, Strategy, RowData, MarketInfo, MarketTy
 from demeter.aave import AaveBalance, AaveV3Market, AaveTokenStatus, SupplyKey, BorrowKey
 import pandas as pd
 from langchain_core.messages import SystemMessage
-from proteus_standalone import LendingAgent
+from proteus_agent import ProteusAgent
 from pydantic import BaseModel, Field
 from langchain_core.tools import tool
 from typing import Optional
@@ -107,14 +107,14 @@ class MySimpleStrategy(Strategy):
     def initialize(self):
         # initial prompt
         prompt = '''You are a lending agent working in the Aave lending protocol.
-        In every message I will provide you your current balance for each currency.
+        In every message I will provide you your current balance and market status.
         In addition, I will provide you some stats about the last 30 minutes.
         Your goal is to decide wheter supply, borrow, withdraw tokens or repay.
-        You will be in charge of your strategy.
+        You will be in charge of your strategy, try to maximize your profit.
         '''
         #init the agent
         self.model = ChatOpenAI(model="gpt-4o-mini")
-        self.agent = LendingAgent(self.model, [supply, borrow, withdraw, repay], prompt)
+        self.agent = ProteusAgent(self.model, [supply, borrow, withdraw, repay], prompt)
         self.counter = 0
         pass
 

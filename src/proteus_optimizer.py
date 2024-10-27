@@ -4,26 +4,30 @@ from typing import TypedDict, Annotated
 import operator
 from langchain_core.messages import AnyMessage, SystemMessage, ToolMessage
 from langchain_core.tools import tool
+from queue import PriorityQueue
+"""
+class Lender(TypedDict):
+    address: str
+    amount: float
 
-# defining agent state
+class Borrower(TypedDict):
+    address: str
+    amount: float
+"""
+
 class AgentState(TypedDict):
     messages: Annotated[list[AnyMessage], operator.add]
+    lenders: PriorityQueue
+    borrowers: PriorityQueue
     
-#let's define a LangGraph agent with 4 tools, a central node that can use any tool
-class LendingAgent:
-    def __init__(self, model, tools, prompt):
+class ProteusOptimizer:
+    def __init__(self, model):
         graph = StateGraph(AgentState)
         
         graph.add_node("llm", self.call_llm)
         graph.add_node("execute_function", self.execute_function)
         graph.add_conditional_edges("llm", self.exists_function_calling, {True: "function", False: END})   
         graph.add_edge("execute_function", "llm")
-        
-        self.tools = {t.name: t for t in tools}
-
-        self.system_prompt = prompt
-        
-        self.model = model.bind_tools(tools)
         
     def call_llm(self, state: AgentState) -> AgentState:
         """Calls the LLM to get a response.
@@ -43,7 +47,7 @@ class LendingAgent:
         llm_response = self.model.invoke(messages)
         
         # Add the LLM response to the message history
-        state['messages'].append(llm_response)  # Add this line!
+        state['messages'].append(llm_response) 
 
         # Check if the LLM wants to call a tool
         if llm_response.tool_calls:
@@ -55,6 +59,7 @@ class LendingAgent:
         # Update the state with the LLM response or tool responses
         return {'messages': messages}
     
+    # Execute one of the tools provided to the agent
     def execute_function(self, state: AgentState):
         tool_calls = state['messages'][-1].tool_calls
 
@@ -76,6 +81,7 @@ class LendingAgent:
         )
         return {'messages': results}
     
+    #It checks if there is a tool call in the trace, otherwise it won't take that path in the graph
     def exists_function_calling(self, state: AgentState):
         result = state['messages'][-1]
         return len(result.tool_calls) > 0
