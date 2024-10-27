@@ -64,7 +64,7 @@ if __name__ == "__main__":
     broker.set_balance(usdc, 20)
     broker.set_balance(weth, 100)
     actuator.strategy = ExampleStrategy()
-    prices_df = pd.read_csv("./prices.csv", index_col=0, parse_dates=True)
+    prices_df = pd.read_csv("../data/WETH_USDC_Prices.csv", index_col=0, parse_dates=True)
 
     actuator.set_price(prices_df)
 
