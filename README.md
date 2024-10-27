@@ -22,6 +22,9 @@ Proteus, the agent proposed, can work in two modes:
 * **Automate Lending Strategies:** The agent is able to execute lending strategies based on market conditions.
 * **Optimize Lending Returns:** The agent leverages LLMs to analyze market data, identify profitable opportunities, and adjust strategies accordingly.
 
+### Getting Started
+Please click (this link)[./src/README.md] to getting started. It will guide you through all the phases of the project.
+
 ### Project Status
 This project works off-chain, using Demeter library for backtesting. Future work will involve risk analysis and on-chain deployment.
 
@@ -30,3 +33,6 @@ The project is structured as follows:
 * **src:** Contains the source code for the lending agent.
 * **data:** Contains market data used for training and backtesting.
 * **docs:** Contains documentation for the project.
+
+### Disclaimer
+This project was built during the Encode London 2024 Hackaton to participate in the RNDM.io tracks. It is not intended to be used in production as it was developed in two days without sleeping.
