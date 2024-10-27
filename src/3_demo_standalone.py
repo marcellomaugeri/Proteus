@@ -13,6 +13,8 @@ from typing import Optional
 
 global market
 
+DEBUG = True
+
 class Operation(BaseModel):
     token: TokenInfo = Field(description="Token to operate on")
     amount: float = Field(description="Amount to operate on. It is 0 for withdraw and repay")
@@ -30,6 +32,8 @@ def supply(token: TokenInfo, amount: float) -> Optional[SupplyKey]:
     """
     try:
         supply_key = market.supply(token, amount)
+        if DEBUG:
+            print("\033[31mSupplied {} {} tokens\033[34m".format(amount, token.name))
         return supply_key
     except Exception as e:
         print(e)
@@ -48,6 +52,8 @@ def borrow(token: TokenInfo, amount: float) -> Optional[BorrowKey]:
     """
     try:
         borrow_key = market.borrow(token, amount)
+        if DEBUG:
+            print("\033[31mBorrowed {} {} tokens\033[34m".format(amount, token.name))
         return borrow_key
     except Exception as e:
         print(e)
@@ -65,7 +71,9 @@ def withdraw(token: TokenInfo, amount: float) -> bool:
         True if the withdrawal is successful, otherwise False.
     """
     try:
-        market.withdraw(token)  # Use the supply_key here
+        market.withdraw(token)
+        if DEBUG:
+            print("\033[31mWithdrew {} {} tokens\033[34m".format(amount, token.name))
         return True
     except Exception as e:
         print(e)
@@ -83,7 +91,9 @@ def repay(token: TokenInfo, amount: float) -> bool:
         True if the repayment is successful, otherwise False.
     """
     try:
-        market.repay(token)  # Use the borrow_key here
+        market.repay(token)
+        if DEBUG:
+            print("\033[31mRepaid {} {} tokens\033[34m".format(amount, token.name))
         return True
     except Exception as e:
         print(e)
@@ -143,7 +153,7 @@ class MySimpleStrategy(Strategy):
     
     
 if __name__ == "__main__":
-    print("""BLUE = '\033[34m'
+    print("""\033[34m
           
  ,---.  ,---.    .---.  _______ ,---.  .-. .-.   .---. 
  | .-.\ | .-.\  / .-. )|__   __|| .-'  | | | |  ( .-._)

@@ -46,10 +46,10 @@ if __name__ == "__main__":
     token_list = [ usdc, weth ]
 
     market_key = MarketInfo("aave", MarketTypeEnum.aave_v3)
-    market = AaveV3Market(market_key, "riskparameters.csv", token_list)
+    market = AaveV3Market(market_key, "../data/riskparameters.csv", token_list)
     
     #Dataset downloaded from BigQuery
-    market.data_path = "./sample"
+    market.data_path = "../data/sample"
 
     market.load_data(
         chain=ChainType.polygon,
